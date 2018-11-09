@@ -57,62 +57,102 @@ public class MainActivity extends AppCompatActivity {
         etTexto = findViewById(R.id.etTexto);
         svScroll = findViewById(R.id.svScroll);
         tvTexto = findViewById(R.id.tvTexto);
+
         if(startBot()) {
             setEvents();
         }
     }
 
     private void chat(final String text) {
+
+        // Pasa a showMessage la respuesta del bot o muestra el tipo de excepción si está se produce
+
         String response;
+
         try {
             response = getString(R.string.bot) + " " + botSession.think(text);
+
         } catch (final Exception e) {
+
             response = getString(R.string.exception) + " " + e.toString();
         }
+
         tvTexto.post(showMessage(response));
     }
 
     private void setEvents() {
+
         btSend.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View view) {
+
+                // Muestra el mensaje que escribimos.
+
                 final String text = getString(R.string.you) + " " + etTexto.getText().toString().trim();
                 btSend.setEnabled(false);
                 etTexto.setText("");
                 tvTexto.append(text + "\n");
+
+                //Esta hebra llama a chat, que se encargará de pedir la respuesta del bot.
+
+
+                /* -----------------------------------------Cambiar------------------------------------------------------*/
                 new Thread(){
+
                     @Override
                     public void run() {
+
                         chat(text);
                     }
+
                 }.start();
             }
         });
     }
 
     private boolean startBot() {
+
+        /* Devuelve true si se crea correctamente el bot
+        *  Devuelve false si no ocurre alguna excepción
+        */
+
         boolean result = true;
         String initialMessage;
         factory = new ChatterBotFactory();
+
         try {
+
             bot = factory.create(ChatterBotType.PANDORABOTS, "b0dafd24ee35a477");
+
             botSession = bot.createSession();
+
             initialMessage = getString(R.string.messageConnected) + "\n";
+
         } catch(Exception e) {
+
             initialMessage = getString(R.string.messageException) + "\n" + getString(R.string.exception) + " " + e.toString();
+
             result = false;
         }
+
         tvTexto.setText(initialMessage);
+
         return result;
     }
 
+    /* -----------------------------------------Cambiar------------------------------------------------------*/
     private Runnable showMessage(final String message) {
+
+        //Devuelve un runnable
+
         return new Runnable() {
+
             @Override
             public void run() {
-                etTexto.requestFocus();
-                tvTexto.append(message + "\n");
-                svScroll.fullScroll(View.FOCUS_DOWN);
+                etTexto.requestFocus(); // Pone el foco del cursor en el editText
+                tvTexto.append(message + "\n"); //Añade la interacción nueva
+                svScroll.fullScroll(View.FOCUS_DOWN); //Hace scroll hacía abajo para que muestren los últimos mensajes.
                 btSend.setEnabled(true);
                 hideKeyboard();
             }
@@ -120,11 +160,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void hideKeyboard() {
+
+        //Esconde el teclado
+
         InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
         View view = getCurrentFocus();
+
         if (view == null) {
             view = new View(this);
         }
+
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
