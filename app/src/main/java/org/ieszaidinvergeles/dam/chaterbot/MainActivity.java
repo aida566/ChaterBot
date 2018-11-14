@@ -1,7 +1,7 @@
 package org.ieszaidinvergeles.dam.chaterbot;
 
 import android.app.Activity;
-import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -15,22 +15,6 @@ import org.ieszaidinvergeles.dam.chaterbot.api.ChatterBot;
 import org.ieszaidinvergeles.dam.chaterbot.api.ChatterBotFactory;
 import org.ieszaidinvergeles.dam.chaterbot.api.ChatterBotSession;
 import org.ieszaidinvergeles.dam.chaterbot.api.ChatterBotType;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.net.ssl.HttpsURLConnection;
 
 //https://github.com/pierredavidbelanger/chatter-bot-api
 
@@ -63,23 +47,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void chat(final String text) {
-
-        // Pasa a showMessage la respuesta del bot o muestra el tipo de excepción si está se produce
-
-        String response;
-
-        try {
-            response = getString(R.string.bot) + " " + botSession.think(text);
-
-        } catch (final Exception e) {
-
-            response = getString(R.string.exception) + " " + e.toString();
-        }
-
-        tvTexto.post(showMessage(response));
-    }
-
     private void setEvents() {
 
         btSend.setOnClickListener(new View.OnClickListener() {
@@ -87,26 +54,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                // Muestra el mensaje que escribimos.
-
                 final String text = getString(R.string.you) + " " + etTexto.getText().toString().trim();
-                btSend.setEnabled(false);
-                etTexto.setText("");
-                tvTexto.append(text + "\n");
 
-                //Esta hebra llama a chat, que se encargará de pedir la respuesta del bot.
-
-
-                /* -----------------------------------------Cambiar------------------------------------------------------*/
-                new Thread(){
-
-                    @Override
-                    public void run() {
-
-                        chat(text);
-                    }
-
-                }.start();
+                Tarea tarea = new Tarea();
+                tarea.execute(new String[]{text});
             }
         });
     }
@@ -141,23 +92,6 @@ public class MainActivity extends AppCompatActivity {
         return result;
     }
 
-    /* -----------------------------------------Cambiar------------------------------------------------------*/
-    private Runnable showMessage(final String message) {
-
-        //Devuelve un runnable
-
-        return new Runnable() {
-
-            @Override
-            public void run() {
-                etTexto.requestFocus(); // Pone el foco del cursor en el editText
-                tvTexto.append(message + "\n"); //Añade la interacción nueva
-                svScroll.fullScroll(View.FOCUS_DOWN); //Hace scroll hacía abajo para que muestren los últimos mensajes.
-                btSend.setEnabled(true);
-                hideKeyboard();
-            }
-        };
-    }
 
     public void hideKeyboard() {
 
@@ -173,5 +107,49 @@ public class MainActivity extends AppCompatActivity {
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
-    
+    public class Tarea extends AsyncTask<String, String, Void> {
+
+        @Override
+        protected void onPreExecute() {
+
+            btSend.setEnabled(false);
+        }
+
+        @Override
+        protected Void doInBackground(String... textH) {
+
+            etTexto.setText("");
+            tvTexto.append(textH[0] + "\n");
+
+            // Pasa a showMessage la respuesta del bot o muestra el tipo de excepción si está se produce
+
+            String textoBot;
+
+            try {
+                textoBot = getString(R.string.bot) + " " + botSession.think(textH[0]);
+
+            } catch (final Exception e) {
+
+                textoBot = getString(R.string.exception) + " " + e.toString();
+            }
+
+            publishProgress(textoBot);
+
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(String... textoBot) {
+
+            etTexto.requestFocus(); // Pone el foco del cursor en el editText
+            tvTexto.append(textoBot[0] + "\n"); //Añade la interacción nueva
+            svScroll.fullScroll(View.FOCUS_DOWN); //Hace scroll hacía abajo para que muestren los últimos mensajes.
+            btSend.setEnabled(true);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            hideKeyboard();
+        }
+    }
 }
