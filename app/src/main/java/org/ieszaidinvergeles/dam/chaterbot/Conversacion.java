@@ -2,10 +2,10 @@ package org.ieszaidinvergeles.dam.chaterbot;
 
 public class Conversacion {
 
-    String id;
+    Long id;
     String fecha;
 
-    public Conversacion(String id, String fecha) {
+    public Conversacion(Long id, String fecha) {
         this.id = id;
         this.fecha = fecha;
     }
@@ -17,11 +17,11 @@ public class Conversacion {
         this.fecha = fecha;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

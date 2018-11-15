@@ -3,12 +3,11 @@ package org.ieszaidinvergeles.dam.chaterbot;
 public class Chat {
 
     int id;
-    int idConver;
+    long idConver;
     String quien;
     String text;
 
-    public Chat(int id, int idConver, String quien, String text) {
-        this.id = id;
+    public Chat(long idConver, String quien, String text) {
         this.idConver = idConver;
         this.quien = quien;
         this.text = text;
@@ -25,7 +24,7 @@ public class Chat {
         this.id = id;
     }
 
-    public int getIdConver() {
+    public long getIdConver() {
         return idConver;
     }
 

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -16,9 +17,15 @@ import org.ieszaidinvergeles.dam.chaterbot.api.ChatterBotFactory;
 import org.ieszaidinvergeles.dam.chaterbot.api.ChatterBotSession;
 import org.ieszaidinvergeles.dam.chaterbot.api.ChatterBotType;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 //https://github.com/pierredavidbelanger/chatter-bot-api
 
 public class MainActivity extends AppCompatActivity {
+
+    static final String TAG = "MITAG";
 
     private Button btSend;
     private EditText etTexto;
@@ -29,11 +36,44 @@ public class MainActivity extends AppCompatActivity {
     private ChatterBotFactory factory;
     private ChatterBotSession botSession;
 
+    private Gestor gestor;
+    private Ayudante abd;
+
+    private Conversacion conver;
+    private long idConver;
+
+    private String deBot = "bot";
+    private String dePersona = "persona";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         init();
+
+        abd = new Ayudante(this);
+
+        gestor = new Gestor(this, true);
+
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = new Date();
+
+        if(gestor.get(dateFormat.format(date))== null){
+
+            Log.v(TAG, "=null");
+
+            conver = new Conversacion(dateFormat.format(date));
+
+            idConver = gestor.insertConversacion(conver);
+
+        }else{
+
+            Log.v(TAG, "no es null");
+
+            conver = gestor.get(dateFormat.format(date));
+
+            idConver = conver.getId();
+        }
     }
 
     private void init() {
@@ -58,6 +98,9 @@ public class MainActivity extends AppCompatActivity {
                 btSend.setEnabled(false);
                 etTexto.setText("");
                 tvTexto.append(text + "\n");
+
+                Chat chat = new Chat(idConver, dePersona, text);
+                long a = gestor.insertChat(chat);
 
                 Tarea tarea = new Tarea();
                 tarea.execute(new String[]{text});
@@ -95,7 +138,6 @@ public class MainActivity extends AppCompatActivity {
         return result;
     }
 
-
     public void hideKeyboard() {
 
         //Esconde el teclado
@@ -111,11 +153,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public class Tarea extends AsyncTask<String, String, Void> {
-
-        @Override
-        protected void onPreExecute() {
-
-        }
 
         @Override
         protected Void doInBackground(String... textH) {
@@ -144,6 +181,12 @@ public class MainActivity extends AppCompatActivity {
             tvTexto.append(textoBot[0] + "\n"); //Añade la interacción nueva
             svScroll.fullScroll(View.FOCUS_DOWN); //Hace scroll hacía abajo para que muestren los últimos mensajes.
             btSend.setEnabled(true);
+
+            Chat chat = new Chat(idConver, deBot, textoBot[0]);
+
+            long a = gestor.insertChat(chat);
+
+            Log.v(TAG, "ID del chatBOT: " + a);
         }
 
         @Override

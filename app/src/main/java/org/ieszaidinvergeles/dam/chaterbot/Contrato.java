@@ -14,7 +14,7 @@ public class Contrato {
         public static final String SQL_CREATE_CONVERSACION_V1 =
                 "create table " + TABLE_NAME +
                 " (" + _ID + " integer primary key autoincrement, " +
-                COLUMN_NAME_FECHA +" DATETIME);";
+                COLUMN_NAME_FECHA +" DATE);";
     }
 
     public static abstract class TablaChat implements BaseColumns {
@@ -25,10 +25,10 @@ public class Contrato {
         public static final String COLUMN_NAME_TEXTO = "texto";
 
         public static final String SQL_CREATE_CHAT_V1 =
-                "create table " + Contrato.TablaConversacion.TABLE_NAME +
+                "create table " + TABLE_NAME +
                 " (" + _ID + " integer primary key autoincrement, " +
-                COLUMN_NAME_IDCONVER + "integer" +
-                COLUMN_NAME_QUIEN + "text" +
+                COLUMN_NAME_IDCONVER + " integer," +
+                COLUMN_NAME_QUIEN + "  text," +
                 COLUMN_NAME_TEXTO +" text);";
     }
 }
