@@ -55,6 +55,9 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 final String text = getString(R.string.you) + " " + etTexto.getText().toString().trim();
+                btSend.setEnabled(false);
+                etTexto.setText("");
+                tvTexto.append(text + "\n");
 
                 Tarea tarea = new Tarea();
                 tarea.execute(new String[]{text});
@@ -112,14 +115,10 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
 
-            btSend.setEnabled(false);
         }
 
         @Override
         protected Void doInBackground(String... textH) {
-
-            etTexto.setText("");
-            tvTexto.append(textH[0] + "\n");
 
             // Pasa a showMessage la respuesta del bot o muestra el tipo de excepción si está se produce
 
@@ -149,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
+
             hideKeyboard();
         }
     }
